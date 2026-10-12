@@ -15,7 +15,7 @@ RUN useradd --create-home --uid 1000 appuser
 COPY pyproject.toml README.md ./
 COPY src ./src
 COPY .streamlit ./.streamlit
-RUN pip install ".[app]"
+RUN pip install ".[app,agent]"
 
 RUN mkdir -p /app/data/raw /app/warehouse && chown -R appuser:appuser /app
 USER appuser

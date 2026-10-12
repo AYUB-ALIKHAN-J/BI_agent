@@ -11,6 +11,9 @@ dependencies = [
     "duckdb>=1.0",
     "pandas>=2.2",
     "numpy>=1.26",
+    "langgraph>=0.2",
+    "langchain-ollama>=0.2",
+    "langchain-core>=0.3",
 ]
 
 [project.optional-dependencies]

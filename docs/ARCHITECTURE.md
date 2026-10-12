@@ -44,7 +44,7 @@ both in one table fans out joins and inflates revenue.
 ## KPI definitions
 See `src/olist_bi/warehouse/kpis.py` docstring (revenue excludes canceled/unavailable orders, etc.).
 
-## Current status (as of Iteration 3)
+## Current status (as of Iteration 4)
 
 ✅ **ETL Pipeline**: 13/13 data quality checks passing
 ✅ **Star Schema**: 6 tables (~100K orders, ~113K items)
@@ -52,11 +52,16 @@ See `src/olist_bi/warehouse/kpis.py` docstring (revenue excludes canceled/unavai
 ✅ **Forecasting**: Backtest MAPE per category with naive/MA3/Holt-damped models
 ✅ **RFM Segmentation**: K-Means clustering on Recency, Frequency, Monetary
 ✅ **Basket Analysis**: Association rules (Apriori algorithm)
+✅ **LLM Agent**: 8 tools, LangGraph ReAct loop, Ollama llama3.1
 ✅ **Tests**: 14/14 passing
+✅ **Docker**: Ollama container as backup, host.docker.internal for local Ollama
 
-## Recent changes (Iteration 3)
+## Recent changes (Iteration 4)
 
-* Added RFM analysis module with K-Means customer segmentation
-* Added market basket analysis with Apriori algorithm
-* Added Segments and Basket tabs to Streamlit dashboard
-* Updated analytics module structure with separate packages for forecast, rfm, basket
+* Added agent tools module with 8 functions for KPIs, trends, forecasts, segments, basket rules
+* Implemented LangGraph ReAct agent with tool calling
+* Added Chat tab to Streamlit dashboard with agent integration
+* Added Ollama service to docker-compose.yml as backup
+* Updated Dockerfile to include agent dependencies
+* Added docker-ollama Makefile target
+* Updated README with agent tools documentation

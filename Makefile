@@ -1,4 +1,4 @@
-.PHONY: help install synth etl kpis app test lint fmt docker-build docker-synth docker-etl docker-up clean
+.PHONY: help install synth etl kpis app test lint fmt docker-build docker-synth docker-etl docker-up docker-ollama clean
 
 PY ?= python
 help:            ## list targets
@@ -17,6 +17,9 @@ kpis:            ## print headline KPIs
 	$(PY) -m olist_bi.cli kpis
 
 app:             ## run the dashboard locally
+	streamlit run src/olist_bi/app/streamlit_app.py
+
+start:           ## alias for 'app'
 	streamlit run src/olist_bi/app/streamlit_app.py
 
 test:            ## run the test-suite
@@ -39,6 +42,9 @@ docker-etl:
 
 docker-up:
 	docker compose up app
+
+docker-ollama:
+	docker compose --profile ollama up -d ollama
 
 clean:
 	rm -rf warehouse/*.duckdb .pytest_cache .ruff_cache
