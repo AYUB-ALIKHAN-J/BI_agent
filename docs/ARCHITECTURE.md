@@ -44,17 +44,19 @@ both in one table fans out joins and inflates revenue.
 ## KPI definitions
 See `src/olist_bi/warehouse/kpis.py` docstring (revenue excludes canceled/unavailable orders, etc.).
 
-## Current status (as of Iteration 2)
+## Current status (as of Iteration 3)
 
 ✅ **ETL Pipeline**: 13/13 data quality checks passing
 ✅ **Star Schema**: 6 tables (~100K orders, ~113K items)
-✅ **Dashboard**: 4 tabs (Overview, Delivery & CX, Drill-down, Forecast)
+✅ **Dashboard**: 7 tabs (Overview, Delivery & CX, Drill-down, Forecast, Segments, Basket, Chat)
 ✅ **Forecasting**: Backtest MAPE per category with naive/MA3/Holt-damped models
+✅ **RFM Segmentation**: K-Means clustering on Recency, Frequency, Monetary
+✅ **Basket Analysis**: Association rules (Apriori algorithm)
 ✅ **Tests**: 14/14 passing
 
-## Recent changes (Iteration 2)
+## Recent changes (Iteration 3)
 
-* Fixed `fulfilled_orders_have_items` validation check to allow 'shipped' and 'invoiced' statuses with 0 items
-* Added demand forecasting module with backtest validation
-* Integrated forecast tab into Streamlit dashboard
-* Updated tests to work with real Olist data
+* Added RFM analysis module with K-Means customer segmentation
+* Added market basket analysis with Apriori algorithm
+* Added Segments and Basket tabs to Streamlit dashboard
+* Updated analytics module structure with separate packages for forecast, rfm, basket

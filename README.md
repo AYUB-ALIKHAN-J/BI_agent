@@ -4,7 +4,7 @@ End-to-end BI system on the Olist Brazilian e-commerce dataset: ETL to a star-sc
 KPI dashboard, forecasting and segmentation, and an LLM analyst agent that diagnoses sales
 changes and recommends actions. Course project for Business Intelligence Lab.
 
-**Stack:** Python 3.11 · pandas · DuckDB · Streamlit/Plotly · scikit-learn · LangGraph + Ollama · Docker
+**Stack:** Python 3.11 · pandas · DuckDB · Streamlit/Plotly · scikit-learn · mlxtend · LangGraph + Ollama · Docker
 
 ## Quick start (local)
 
@@ -50,9 +50,11 @@ See `docs/ARCHITECTURE.md` and `docs/ROADMAP.md`.
 
 ## Current status
 
-✅ **Iteration 1 & 2 complete:**
+✅ **Iteration 1, 2 & 3 complete:**
 - ETL pipeline with 13 data quality checks
 - Star schema warehouse (6 tables, ~100K orders)
-- 4 dashboard tabs: Overview, Delivery & CX, Drill-down, Forecast
+- 7 dashboard tabs: Overview, Delivery & CX, Drill-down, Forecast, Segments, Basket, Chat
 - Demand forecasting with backtest MAPE per category
+- RFM customer segmentation with K-Means clustering
+- Market basket analysis with association rules
 - All 14 tests passing

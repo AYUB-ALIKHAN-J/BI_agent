@@ -1,11 +1,11 @@
-"""Streamlit GUI. Iteration 2: Overview, Delivery & CX, Drill-down, Forecast.
+"""Streamlit GUI. Iteration 2-3: Overview, Delivery & CX, Drill-down, Forecast, Segments, Basket.
 The chat tab arrives in Iteration 4."""
 
 from __future__ import annotations
 
 import streamlit as st
 
-from olist_bi.app.tabs import delivery, drilldown, forecast, overview
+from olist_bi.app.tabs import basket, delivery, drilldown, forecast, overview, segments
 from olist_bi.config import get_settings
 from olist_bi.warehouse import kpis
 from olist_bi.warehouse.connection import WarehouseNotFound
@@ -44,8 +44,8 @@ def main() -> None:
             )
         st.caption(f"Warehouse: `{WH.name}`")
 
-    t_over, t_cx, t_dd, t_fc, t_chat = st.tabs(
-        ["Overview", "Delivery & CX", "Drill-down", "Forecast", "Ask the analyst (coming soon)"]
+    t_over, t_cx, t_dd, t_fc, t_seg, t_basket, t_chat = st.tabs(
+        ["Overview", "Delivery & CX", "Drill-down", "Forecast", "Segments", "Basket", "Ask the analyst (coming soon)"]
     )
     with t_over:
         overview.render(WH, start, end)
@@ -55,6 +55,10 @@ def main() -> None:
         drilldown.render(WH, start, end)
     with t_fc:
         forecast.render(WH, start, end)
+    with t_seg:
+        segments.render(WH, start, end)
+    with t_basket:
+        basket.render(WH, start, end)
     with t_chat:
         st.info("The LLM analyst agent is built in Iteration 4.")
 
