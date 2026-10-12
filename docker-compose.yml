@@ -1,0 +1,35 @@
+# Usage:
+#   docker compose --profile etl run --rm etl     # build the warehouse from data/raw
+#   docker compose up app                          # dashboard on http://localhost:8501
+#   docker compose --profile dev run --rm synth    # generate synthetic data first (dev only)
+
+x-common: &common
+  build: .
+  environment:
+    OLIST_DATA_DIR: /app/data/raw
+    OLIST_WAREHOUSE_PATH: /app/warehouse/olist.duckdb
+    # Iteration 4: reach the Ollama already running on your machine
+    OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1}
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  volumes:
+    - ./data:/app/data
+    - ./warehouse:/app/warehouse
+
+services:
+  app:
+    <<: *common
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
+
+  etl:
+    <<: *common
+    command: ["olist-bi", "etl"]
+    profiles: ["etl"]
+
+  synth:
+    <<: *common
+    command: ["olist-bi", "synth"]
+    profiles: ["dev"]
