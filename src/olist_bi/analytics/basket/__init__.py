@@ -88,3 +88,32 @@ def top_rules_by_category(
     rules = rules.sort_values(["antecedent_count", "lift"], ascending=False)
 
     return rules.drop_duplicates(subset=["antecedents"]).head(top_n)
+
+
+def popular_products(
+    warehouse: str | Path,
+    start: str | None = None,
+    end: str | None = None,
+    top_n: int = 10,
+) -> pd.DataFrame:
+    """Get most popular product categories by order count."""
+    return query_df(
+        warehouse,
+        f"""
+        SELECT
+            p.category,
+            COUNT(DISTINCT i.order_id) as orders,
+            COUNT(i.order_item_id) as items,
+            ROUND(SUM(i.price), 2) as revenue
+        FROM fact_order_items i
+        JOIN fact_orders o USING (order_id)
+        JOIN dim_product p USING (product_key)
+        JOIN dim_date d ON d.date_key = i.date_key
+        WHERE o.order_status NOT IN ('canceled', 'unavailable')
+          AND d.year_month BETWEEN ? AND ?
+        GROUP BY p.category
+        ORDER BY orders DESC
+        LIMIT {int(top_n)}
+        """,
+        [start or "0000-00", end or "9999-99"],
+    )

@@ -8,6 +8,7 @@ from olist_bi.analytics import basket as basket_module
 from olist_bi.app.common import cached_query
 
 rules_q = cached_query(basket_module.top_rules_by_category)
+popular_q = cached_query(basket_module.popular_products)
 
 
 def render(wh, start: str, end: str) -> None:
@@ -29,7 +30,16 @@ def render(wh, start: str, end: str) -> None:
         return
 
     if rules.empty:
-        st.info("No association rules found for the selected parameters")
+        st.info(
+            "No association rules found for the selected parameters. "
+            "This is common when most orders contain only one item. "
+            "The Olist dataset has an average of 1.14 items per order."
+        )
+        
+        # Show popular products instead
+        st.subheader("Most Popular Categories")
+        popular = popular_q(str(wh), start, end, 10)
+        st.dataframe(popular, use_container_width=True, hide_index=True)
         return
 
     st.caption(f"Found {len(rules)} association rules")
