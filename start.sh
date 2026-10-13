@@ -32,4 +32,5 @@ fi
 echo "Starting Streamlit dashboard..."
 echo "Open http://localhost:8501 in your browser"
 echo ""
+export PYTHONWARNINGS="ignore::DeprecationWarning"
 streamlit run src/olist_bi/app/streamlit_app.py

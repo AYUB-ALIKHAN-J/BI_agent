@@ -39,7 +39,7 @@ def render(wh, start: str, end: str) -> None:
         # Show popular products instead
         st.subheader("Most Popular Categories")
         popular = popular_q(str(wh), start, end, 10)
-        st.dataframe(popular, use_container_width=True, hide_index=True)
+        st.dataframe(popular, width="stretch", hide_index=True)
         return
 
     st.caption(f"Found {len(rules)} association rules")
@@ -48,7 +48,7 @@ def render(wh, start: str, end: str) -> None:
     st.subheader("Top Association Rules")
     st.dataframe(
         rules[["antecedents", "consequents", "support", "confidence", "lift"]].head(20),
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -68,4 +68,4 @@ def render(wh, start: str, end: str) -> None:
     with st.expander("Top rules by category"):
         top_rules = rules_q(str(wh), start, end, 10)
         if not top_rules.empty:
-            st.dataframe(top_rules, use_container_width=True, hide_index=True)
+            st.dataframe(top_rules, width="stretch", hide_index=True)

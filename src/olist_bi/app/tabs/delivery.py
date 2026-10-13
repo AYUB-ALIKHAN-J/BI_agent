@@ -38,7 +38,7 @@ def render(wh, start: str, end: str) -> None:
             title="Avg review by delivery delay",
             range_y=[0, 5],
         ),
-        use_container_width=True,
+        width="stretch",
     )
     right.plotly_chart(
         px.bar(
@@ -47,7 +47,7 @@ def render(wh, start: str, end: str) -> None:
             y="pct_low_review",
             title="Share of 1-2 star reviews",
         ).update_yaxes(tickformat=".0%"),
-        use_container_width=True,
+        width="stretch",
     )
 
     left, right = st.columns(2)
@@ -59,11 +59,11 @@ def render(wh, start: str, end: str) -> None:
             y="on_time_rate",
             title="On-time rate by customer state (worst first)",
         ).update_yaxes(tickformat=".0%", range=[0, 1]),
-        use_container_width=True,
+        width="stretch",
     )
     right.plotly_chart(
         px.bar(
             dist_q(wh, start, end), x="days", y="orders", title="Delivery time distribution (days, 40 = 40+)"
         ),
-        use_container_width=True,
+        width="stretch",
     )

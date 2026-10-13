@@ -27,7 +27,7 @@ def render(wh, start: str, end: str) -> None:
     left, right = st.columns(2)
     left.plotly_chart(
         px.line(trend, x="year_month", y="revenue", markers=True, title="Monthly revenue"),
-        use_container_width=True,
+        width="stretch",
     )
     dual = go.Figure()
     dual.add_scatter(
@@ -46,7 +46,7 @@ def render(wh, start: str, end: str) -> None:
         yaxis2={"title": "Avg review", "overlaying": "y", "side": "right", "range": [1, 5]},
         legend={"orientation": "h", "y": -0.2},
     )
-    right.plotly_chart(dual, use_container_width=True)
+    right.plotly_chart(dual, width="stretch")
 
     left, right = st.columns(2)
     cat = cat_q(wh, start, end)
@@ -54,9 +54,9 @@ def render(wh, start: str, end: str) -> None:
         px.bar(cat, x="revenue", y="category", orientation="h", title="Top categories").update_yaxes(
             autorange="reversed"
         ),
-        use_container_width=True,
+        width="stretch",
     )
     right.plotly_chart(
         px.bar(state_q(wh, start, end), x="state", y="revenue", title="Revenue by customer state"),
-        use_container_width=True,
+        width="stretch",
     )

@@ -42,7 +42,7 @@ def render(wh, start: str, end: str) -> None:
                 "avg_monetary",
             ]
         ],
-        use_container_width=True,
+        width="stretch",
     )
 
     # Visualize revenue share
@@ -58,6 +58,6 @@ def render(wh, start: str, end: str) -> None:
                 st.markdown(f"**{segment}**")
                 st.dataframe(
                     seg_df[["customer_unique_id", "customer_state", "monetary", "frequency"]],
-                    use_container_width=True,
+                    width="stretch",
                     hide_index=True,
                 )

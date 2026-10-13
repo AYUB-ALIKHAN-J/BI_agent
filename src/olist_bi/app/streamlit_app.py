@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import warnings
+
+# Suppress upstream library deprecation warnings on newer Python versions
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 import streamlit as st
 
 from olist_bi.app.tabs import basket, chat, delivery, drilldown, forecast, overview, segments

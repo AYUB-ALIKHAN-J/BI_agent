@@ -25,4 +25,5 @@ if not exist "warehouse\olist.duckdb" (
 echo Starting Streamlit dashboard...
 echo Open http://localhost:8501 in your browser
 echo.
+set PYTHONWARNINGS=ignore::DeprecationWarning
 streamlit run src/olist_bi/app/streamlit_app.py

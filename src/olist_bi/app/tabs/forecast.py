@@ -58,11 +58,11 @@ def render(wh, start: str, end: str) -> None:  # noqa: ARG001 - forecast uses th
         x=r.forecast.index, y=r.forecast.values, name="Forecast", mode="lines+markers", line={"dash": "dash"}
     )
     fig.update_layout(title=f"{metric.title()} - {category}", legend={"orientation": "h", "y": -0.2})
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     m = pd.DataFrame(r.metrics).T.rename_axis("model").reset_index()
     st.markdown("**Backtest accuracy by model** (last 3 months held out)")
     st.dataframe(m.style.format({"mape": "{:.1%}", "wape": "{:.1%}"}), hide_index=True)
 
     with st.expander("Top-10 categories: forecast summary"):
-        st.dataframe(summary_q(wh, 10, metric, 3), hide_index=True, use_container_width=True)
+        st.dataframe(summary_q(wh, 10, metric, 3), hide_index=True, width="stretch")

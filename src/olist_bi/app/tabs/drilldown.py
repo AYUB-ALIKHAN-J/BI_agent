@@ -21,7 +21,7 @@ def render(wh, start: str, end: str) -> None:
         m = cat_monthly_q(wh, cat, start, end)
         st.plotly_chart(
             px.bar(m, x="year_month", y="revenue", hover_data=["orders"], title=f"Monthly revenue: {cat}"),
-            use_container_width=True,
+            width="stretch",
         )
 
     min_orders = st.slider("Minimum orders per seller", 5, 100, 30, step=5, key="dd_min")
@@ -32,7 +32,7 @@ def render(wh, start: str, end: str) -> None:
     else:
         st.dataframe(
             sc,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "late_rate": st.column_config.ProgressColumn(

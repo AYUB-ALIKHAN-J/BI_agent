@@ -7,7 +7,11 @@ about e-commerce performance using 6 tools for KPIs, trends, forecasts, etc.
 from __future__ import annotations
 
 import os
+import warnings
 from typing import TypedDict
+
+# Suppress upstream library deprecation warnings on newer Python versions (e.g. LangSmith on 3.14)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.checkpoint.memory import MemorySaver
