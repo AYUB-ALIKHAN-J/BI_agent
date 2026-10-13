@@ -9,7 +9,7 @@ from __future__ import annotations
 import os
 from typing import TypedDict
 
-from langchain_ollama import ChatOllama
+from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
@@ -24,25 +24,43 @@ from olist_bi.agent.tools import (
     get_revenue_by_state,
     get_rfm_segments,
 )
+from olist_bi.config import get_settings
 
 
-def get_model() -> ChatOllama:
-    """Get Ollama model from environment or default."""
-    base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-    model_name = os.environ.get("OLLAMA_MODEL", "llama3.1")
-    return ChatOllama(
-        base_url=base_url,
-        model=model_name,
-        temperature=0.1,
+def get_model() -> BaseChatModel:
+    """Factory creating the configured LLM (Ollama or Groq)."""
+    settings = get_settings()
+    provider = settings.llm_provider
+
+    if provider == "groq":
+        from langchain_groq import ChatGroq
+
+        api_key = settings.groq_api_key or os.environ.get("GROQ_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "GROQ_API_KEY is not set. Please set it in your .env file or environment."
+            )
+        return ChatGroq(
+            api_key=api_key,
+            model=settings.groq_model,
+            temperature=0.1,
+        )
+
+    if provider == "ollama":
+        from langchain_ollama import ChatOllama
+
+        return ChatOllama(
+            base_url=settings.ollama_base_url,
+            model=settings.ollama_model,
+            temperature=0.1,
+        )
+
+    raise ValueError(
+        f"Unsupported LLM_PROVIDER '{provider}'. Supported values: 'ollama', 'groq'."
     )
 
 
-class AgentState(TypedDict):
-    """State for the agent graph."""
-    messages: list
-
-
-def call_model(state: AgentState) -> AgentState:
+def call_model(state: MessagesState) -> dict:
     """Call the LLM."""
     model = get_model()
     tools = [
@@ -60,7 +78,7 @@ def call_model(state: AgentState) -> AgentState:
     return {"messages": [response]}
 
 
-def should_continue(state: AgentState) -> str:
+def should_continue(state: MessagesState) -> str:
     """Determine if we should continue tool calling or finish."""
     messages = state["messages"]
     last_message = messages[-1]
@@ -97,7 +115,7 @@ available_months, forecast, rfm_segments, basket_rules"""
     
     tool_node = ToolNode(tools)
     
-    workflow = StateGraph(AgentState)
+    workflow = StateGraph(MessagesState)
     
     workflow.add_node("agent", call_model)
     workflow.add_node("tools", tool_node)

@@ -12,6 +12,23 @@ def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(_project_root() / ".env")
+except ImportError:
+    pass
+
+
+def _default_provider() -> str:
+    explicit = os.getenv("LLM_PROVIDER")
+    if explicit:
+        return explicit.lower()
+    if os.getenv("GROQ_API_KEY"):
+        return "groq"
+    return "ollama"
+
+
 @dataclass(frozen=True)
 class Settings:
     data_dir: Path = field(
@@ -23,10 +40,15 @@ class Settings:
         )
     )
     log_level: str = field(default_factory=lambda: os.getenv("OLIST_LOG_LEVEL", "INFO"))
+    llm_provider: str = field(default_factory=_default_provider)
     ollama_base_url: str = field(
         default_factory=lambda: os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     )
     ollama_model: str = field(default_factory=lambda: os.getenv("OLLAMA_MODEL", "llama3.1"))
+    groq_api_key: str | None = field(default_factory=lambda: os.getenv("GROQ_API_KEY"))
+    groq_model: str = field(
+        default_factory=lambda: os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
+    )
 
 
 def get_settings() -> Settings:

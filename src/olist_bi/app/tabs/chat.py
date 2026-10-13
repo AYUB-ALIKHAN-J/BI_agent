@@ -24,11 +24,16 @@ def render(wh, start: str, end: str) -> None:
         "analyze KPIs, trends, forecasts, segments, and basket rules."
     )
     
-    # Show available months for context
+    # Show available months and active model provider for context
     try:
         from olist_bi.warehouse import kpis
         months = kpis.available_months(str(wh))
-        st.caption(f"📊 Data available: {months[0]} to {months[-1]}")
+        provider_info = (
+            f"Groq ({settings.groq_model})"
+            if settings.llm_provider == "groq"
+            else f"Ollama ({settings.ollama_model})"
+        )
+        st.caption(f"📊 Data: {months[0]} to {months[-1]} | 🧠 Engine: `{provider_info}`")
     except (WarehouseNotFound, FileNotFoundError):
         st.warning("Run `olist-bi etl` (or `make etl`) first to build the warehouse.")
         return
@@ -66,10 +71,16 @@ Available months: {', '.join(months)}
                     status.update(label="Analysis complete", state="complete")
                 except Exception as e:
                     st.error(f"Error: {e}")
-                    st.info(
-                        "Make sure Ollama is running. For Docker, ensure Ollama is accessible "
-                        "at http://localhost:11434 or set OLLAMA_BASE_URL environment variable."
-                    )
+                    if settings.llm_provider == "groq":
+                        st.info(
+                            "Make sure GROQ_API_KEY is set in your .env or environment, "
+                            f"and that model '{settings.groq_model}' is accessible on Groq."
+                        )
+                    else:
+                        st.info(
+                            "Make sure Ollama is running. For Docker, ensure Ollama is accessible "
+                            "at http://localhost:11434 or set OLLAMA_BASE_URL environment variable."
+                        )
 
 
 # Keep the old placeholder for backwards compatibility
