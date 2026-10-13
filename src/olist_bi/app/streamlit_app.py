@@ -12,11 +12,13 @@ import streamlit as st
 from olist_bi.app.tabs import basket, chat, delivery, drilldown, forecast, overview, segments
 from olist_bi.config import get_settings
 from olist_bi.warehouse import kpis
+from olist_bi.logging_setup import setup_logging
 from olist_bi.warehouse.connection import WarehouseNotFound
 from olist_bi.warehouse.drilldown import reliable_months
 
 st.set_page_config(page_title="Olist Decision Intelligence", page_icon="📊", layout="wide")
 settings = get_settings()
+setup_logging(settings.log_level)
 WH = settings.warehouse_path
 
 

@@ -70,8 +70,16 @@ Available months: {', '.join(months)}
                     st.session_state.messages.append({"role": "assistant", "content": response})
                     status.update(label="Analysis complete", state="complete")
                 except Exception as e:
+                    status.update(label="Analysis failed", state="error")
+                    err_str = str(e)
                     st.error(f"Error: {e}")
-                    if settings.llm_provider == "groq":
+                    if "429" in err_str or "rate limit" in err_str.lower():
+                        st.warning(
+                            "⚠️ Groq rate limit reached (Tokens or Requests Per Minute limit). "
+                            "Please wait a few seconds and try again, or switch to local Ollama (`LLM_PROVIDER=ollama`). "
+                            "Check your terminal for detailed API usage logs."
+                        )
+                    elif settings.llm_provider == "groq":
                         st.info(
                             "Make sure GROQ_API_KEY is set in your .env or environment, "
                             f"and that model '{settings.groq_model}' is accessible on Groq."
