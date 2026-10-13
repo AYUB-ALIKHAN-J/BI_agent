@@ -92,10 +92,10 @@ def seller_scorecard(
             GROUP BY 1, 2
         )
         SELECT sel.seller_id, sel.seller_state,
-               COUNT(*)                                              AS orders,
-               ROUND(SUM(s.revenue), 2)                              AS revenue,
-               ROUND(AVG(o.is_late) FILTER (WHERE o.is_late IS NOT NULL), 3) AS late_rate,
-               ROUND(AVG(o.review_score), 2)                         AS avg_review
+               COUNT(*)                                                       AS orders,
+               ROUND(SUM(s.revenue), 2)                                       AS revenue,
+               ROUND(AVG(o.is_late) FILTER (WHERE o.is_late IS NOT NULL) * 100, 1) AS late_rate,
+               ROUND(AVG(o.review_score), 2)                                  AS avg_review
         FROM s
         JOIN fact_orders o USING (order_id)
         JOIN dim_seller sel USING (seller_key)

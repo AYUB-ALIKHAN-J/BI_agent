@@ -55,7 +55,7 @@ def render(wh, start: str, end: str) -> None:
             hide_index=True,
             column_config={
                 "late_rate": st.column_config.ProgressColumn(
-                    "Late Rate", min_value=0, max_value=1, format="%.0f%%"
+                    "Late Rate", min_value=0, max_value=100, format="%.1f%%"
                 ),
                 "avg_review": st.column_config.NumberColumn("Avg Review", format="%.2f ⭐"),
                 "revenue": st.column_config.NumberColumn("Revenue (R$)", format="R$ %.0f"),
