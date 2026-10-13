@@ -94,8 +94,48 @@ def should_continue(state: MessagesState) -> str:
     return END
 
 
+def _clean_message_text(content: object) -> str:
+    """Normalize LangChain message content to plain text."""
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content.strip()
+    if isinstance(content, list):
+        parts: list[str] = []
+        for item in content:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict):
+                if item.get("type") == "text":
+                    parts.append(str(item.get("text", "")))
+                else:
+                    parts.append(str(item))
+        return "\n".join(part for part in parts if part).strip()
+    return str(content).strip()
+
+
+def extract_final_answer(messages: list[object]) -> str:
+    """Return only the final AI natural-language answer while ignoring tool payload dumps."""
+    for msg in reversed(messages):
+        msg_type = getattr(msg, "type", "")
+        if msg_type != "ai":
+            continue
+
+        content = _clean_message_text(getattr(msg, "content", ""))
+        if not content:
+            continue
+        if content.startswith("tool_call:"):
+            continue
+        if content.startswith("{") and "revenue" in content.lower():
+            continue
+        if "year_month" in content and "revenue" in content.lower():
+            continue
+        return content
+    return ""
+
+
 def run_agent(question: str, thread_id: str = "1") -> str:
-    """Run the agent with a question and return the final answer."""
+    """Run the agent with a question and return the final answer with tool calls."""
     settings = get_settings()
     provider = settings.llm_provider
     model_name = settings.groq_model if provider == "groq" else settings.ollama_model
@@ -159,11 +199,23 @@ available_months, forecast, rfm_segments, basket_rules"""
             {"messages": [{"role": "user", "content": input_message}]},
             config=config,
         )
+
+        tool_calls_info = []
+        for msg in final_state["messages"]:
+            if hasattr(msg, 'tool_calls') and msg.tool_calls:
+                for tc in msg.tool_calls:
+                    tool_calls_info.append(f"tool_call:{tc['name']}|{tc['args']}")
+
+        final_answer = extract_final_answer(final_state["messages"])
+        if final_answer:
+            tool_calls_info.append(final_answer)
+
         elapsed = time.perf_counter() - t0
         tokens_info = f" | Total Tokens: {callback.total_tokens:,}" if callback.total_tokens else ""
         print(f"\n{C.GREEN}✅ [AGENT COMPLETE]{C.RESET} Finished in {elapsed:.2f}s{tokens_info}")
         print(f"{C.BOLD}{'=' * 75}{C.RESET}\n")
-        return final_state["messages"][-1].content
+
+        return "\n\n".join(tool_calls_info)
     except Exception as e:
         elapsed = time.perf_counter() - t0
         print(f"\n{C.RED}❌ [AGENT FAILED]{C.RESET} Execution failed after {elapsed:.2f}s: {e}")

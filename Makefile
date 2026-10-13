@@ -1,11 +1,12 @@
 .PHONY: help install synth etl kpis app test lint fmt docker-build docker-synth docker-etl docker-up docker-ollama clean
 
-PY ?= python
+PY ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python)
+STREAMLIT ?= $(if $(wildcard .venv/bin/streamlit),.venv/bin/streamlit,streamlit)
 help:            ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/ -/'
 
 install:         ## editable install with all extras
-	pip install -e ".[app,analytics,agent,dev]"
+	$(PY) -m pip install -e ".[app,analytics,agent,dev]"
 
 synth:           ## generate a synthetic dev dataset into data/raw (skip if you have real Olist)
 	$(PY) -m olist_bi.cli synth
@@ -17,13 +18,13 @@ kpis:            ## print headline KPIs
 	$(PY) -m olist_bi.cli kpis
 
 app:             ## run the dashboard locally
-	streamlit run src/olist_bi/app/streamlit_app.py
+	$(STREAMLIT) run src/olist_bi/app/streamlit_app.py
 
 start:           ## alias for 'app'
-	streamlit run src/olist_bi/app/streamlit_app.py
+	$(STREAMLIT) run src/olist_bi/app/streamlit_app.py
 
 test:            ## run the test-suite
-	pytest
+	$(PY) -m pytest
 
 lint:            ## lint + format check
 	ruff check . && ruff format --check .

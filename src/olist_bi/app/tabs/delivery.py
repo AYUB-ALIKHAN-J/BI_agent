@@ -7,63 +7,87 @@ from olist_bi.app.common import cached_query
 from olist_bi.warehouse import cx
 
 bucket_q = cached_query(cx.review_by_delay_bucket)
-state_q = cached_query(cx.delivery_by_state)
-dist_q = cached_query(cx.delivery_days_distribution)
+state_q  = cached_query(cx.delivery_by_state)
+dist_q   = cached_query(cx.delivery_days_distribution)
+
+_CHART = dict(
+    paper_bgcolor="#0f1117", plot_bgcolor="#0f1117",
+    font=dict(color="#c9d1d9", size=12),
+    margin=dict(l=10, r=10, t=40, b=10),
+)
+_AXES = dict(
+    xaxis=dict(gridcolor="#2a2d3e", linecolor="#2a2d3e"),
+    yaxis=dict(gridcolor="#2a2d3e", linecolor="#2a2d3e"),
+)
 
 
 def render(wh, start: str, end: str) -> None:
-    st.subheader("Does late delivery hurt customer satisfaction?")
+    st.markdown(
+        "<div class='section-header'>Does late delivery hurt customer satisfaction?</div>",
+        unsafe_allow_html=True,
+    )
+
     b = bucket_q(wh, start, end)
     if b.empty:
         st.info("No delivered orders with reviews in this period.")
         return
 
     on_time = b[b["bucket"].str[0].isin(["1", "2"])]
-    late = b[~b["bucket"].str[0].isin(["1", "2"])]
+    late    = b[~b["bucket"].str[0].isin(["1", "2"])]
+
     if not late.empty and not on_time.empty:
-        a = (on_time["avg_review"] * on_time["orders"]).sum() / on_time["orders"].sum()
-        l_ = (late["avg_review"] * late["orders"]).sum() / late["orders"].sum()
-        c = st.columns(3)
-        c[0].metric("Avg review - on time", f"{a:.2f}")
-        c[1].metric("Avg review - late", f"{l_:.2f}", delta=f"{l_ - a:.2f}", delta_color="inverse")
-        c[2].metric("Late orders", f"{late['orders'].sum() / b['orders'].sum():.1%}")
+        a  = (on_time["avg_review"] * on_time["orders"]).sum() / on_time["orders"].sum()
+        l_ = (late["avg_review"]    * late["orders"]).sum()    / late["orders"].sum()
+        c  = st.columns(4)
+        c[0].metric("⭐ On-time review",  f"{a:.2f}")
+        c[1].metric("⭐ Late review",     f"{l_:.2f}", delta=f"{l_ - a:.2f}", delta_color="inverse")
+        c[2].metric("⏰ Late order share", f"{late['orders'].sum() / b['orders'].sum():.1%}")
+        c[3].metric("📦 Total orders",    f"{b['orders'].sum():,}")
+
+    st.markdown("<div class='section-header'>Review Score by Delivery Delay</div>", unsafe_allow_html=True)
 
     left, right = st.columns(2)
-    left.plotly_chart(
-        px.bar(
-            b,
-            x="bucket",
-            y="avg_review",
-            text="avg_review",
-            title="Avg review by delivery delay",
-            range_y=[0, 5],
-        ),
-        width="stretch",
+
+    fig_review = px.bar(
+        b, x="bucket", y="avg_review", text="avg_review",
+        title="Avg Review by Delivery Delay",
+        range_y=[0, 5],
+        color="avg_review",
+        color_continuous_scale=["#f85149", "#f0883e", "#3fb950"],
     )
-    right.plotly_chart(
-        px.bar(
-            b,
-            x="bucket",
-            y="pct_low_review",
-            title="Share of 1-2 star reviews",
-        ).update_yaxes(tickformat=".0%"),
-        width="stretch",
+    fig_review.update_traces(texttemplate="%{text:.2f}", textposition="outside")
+    fig_review.update_layout(**_CHART, **_AXES, coloraxis_showscale=False)
+    left.plotly_chart(fig_review, width="stretch")
+
+    fig_low = px.bar(
+        b, x="bucket", y="pct_low_review",
+        title="Share of 1-2 Star Reviews",
+        color="pct_low_review",
+        color_continuous_scale=["#3fb950", "#f0883e", "#f85149"],
     )
+    fig_low.update_yaxes(tickformat=".0%")
+    fig_low.update_layout(**_CHART, **_AXES, coloraxis_showscale=False)
+    right.plotly_chart(fig_low, width="stretch")
+
+    st.markdown("<div class='section-header'>Delivery Performance by State</div>", unsafe_allow_html=True)
 
     left, right = st.columns(2)
     s = state_q(wh, start, end)
-    left.plotly_chart(
-        px.bar(
-            s,
-            x="state",
-            y="on_time_rate",
-            title="On-time rate by customer state (worst first)",
-        ).update_yaxes(tickformat=".0%", range=[0, 1]),
-        width="stretch",
+
+    fig_state = px.bar(
+        s, x="state", y="on_time_rate",
+        title="On-time Rate by State (worst first)",
+        color="on_time_rate",
+        color_continuous_scale=["#f85149", "#f0883e", "#3fb950"],
     )
-    right.plotly_chart(
-        px.bar(
-            dist_q(wh, start, end), x="days", y="orders", title="Delivery time distribution (days, 40 = 40+)"
-        ),
-        width="stretch",
+    fig_state.update_yaxes(tickformat=".0%", range=[0, 1])
+    fig_state.update_layout(**_CHART, **_AXES, coloraxis_showscale=False)
+    left.plotly_chart(fig_state, width="stretch")
+
+    fig_dist = px.bar(
+        dist_q(wh, start, end), x="days", y="orders",
+        title="Delivery Time Distribution (days)",
+        color_discrete_sequence=["#4f8ef7"],
     )
+    fig_dist.update_layout(**_CHART, **_AXES)
+    right.plotly_chart(fig_dist, width="stretch")
