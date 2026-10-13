@@ -74,14 +74,22 @@ def render(wh, start: str, end: str) -> None:
     left, right = st.columns(2)
     s = state_q(wh, start, end)
 
+    s_ranked = s.sort_values("on_time_rate", ascending=True).reset_index(drop=True)
     fig_state = px.bar(
-        s, x="state", y="on_time_rate",
-        title="On-time Rate by State (worst first)",
+        s_ranked,
+        x="on_time_rate",
+        y="state",
+        orientation="h",
+        title="On-time Rate by State",
         color="on_time_rate",
         color_continuous_scale=["#f85149", "#f0883e", "#3fb950"],
+        text=s_ranked["on_time_rate"].map(lambda v: f"{v:.0%}"),
     )
-    fig_state.update_yaxes(tickformat=".0%", range=[0, 1])
-    fig_state.update_layout(**_CHART, **_AXES, coloraxis_showscale=False)
+    fig_state.add_vline(x=0.9, line_dash="dash", line_color="#8b949e", annotation_text="90% target")
+    fig_state.update_traces(textposition="outside", cliponaxis=False)
+    fig_state.update_xaxes(tickformat=".0%", range=[0, 1.05])
+    fig_state.update_yaxes(categoryorder="total ascending")
+    fig_state.update_layout(**_CHART, showlegend=False, xaxis_title="On-time rate", yaxis_title="State")
     left.plotly_chart(fig_state, width="stretch")
 
     fig_dist = px.bar(
