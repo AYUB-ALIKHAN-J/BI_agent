@@ -53,11 +53,11 @@ call .venv\Scripts\activate.bat
 
 echo.
 echo Checking dependencies...
-python -c "import olist_bi" >nul 2>&1
+python -c "import olist_bi, streamlit, mlxtend, sklearn, statsmodels" >nul 2>&1
 if %errorlevel% neq 0 (
     echo Installing dependencies...
     python -m pip install --upgrade pip
-    pip install -e ".[app,dev]"
+    pip install -e ".[app,analytics,agent,dev]"
     echo Dependencies installed
 ) else (
     echo Dependencies already installed

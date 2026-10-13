@@ -26,11 +26,7 @@ PYTHON_VERSION=$($PYTHON_CMD --version 2>&1)
 echo "Python: $PYTHON_VERSION"
 
 # Check if Python version is >= 3.10
-PYTHON_VERSION_NUM=$(echo $PYTHON_VERSION | grep -oP '\d+\.\d+' | head -1)
-PYTHON_MAJOR=$(echo $PYTHON_VERSION_NUM | cut -d. -f1)
-PYTHON_MINOR=$(echo $PYTHON_VERSION_NUM | cut -d. -f2)
-
-if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 10 ]); then
+if ! $PYTHON_CMD -c "import sys; exit(0 if sys.version_info >= (3, 10) else 1)" 2>/dev/null; then
     echo "❌ Python 3.10 or higher is required"
     exit 1
 fi
@@ -63,10 +59,10 @@ echo ""
 
 # Check if dependencies are installed
 echo "Checking dependencies..."
-if ! python -c "import olist_bi" 2>/dev/null; then
+if ! python -c "import olist_bi, streamlit, mlxtend, sklearn, statsmodels" 2>/dev/null; then
     echo "Installing dependencies..."
     pip install --upgrade pip
-    pip install -e ".[app,dev]"
+    pip install -e ".[app,analytics,agent,dev]"
     echo "✅ Dependencies installed"
 else
     echo "✅ Dependencies already installed"

@@ -4,8 +4,8 @@ PY ?= python
 help:            ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/ -/'
 
-install:         ## editable install with app + dev extras
-	pip install -e ".[app,dev]"
+install:         ## editable install with all extras
+	pip install -e ".[app,analytics,agent,dev]"
 
 synth:           ## generate a synthetic dev dataset into data/raw (skip if you have real Olist)
 	$(PY) -m olist_bi.cli synth
